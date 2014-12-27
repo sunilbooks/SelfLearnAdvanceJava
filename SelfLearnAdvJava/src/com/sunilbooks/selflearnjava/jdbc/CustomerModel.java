@@ -150,14 +150,69 @@ public class CustomerModel {
 		return customerModel;
 	}
 
-	public List<CustomerModel> search()  {
-		
-		return null;
+	public static List<CustomerModel> search() throws Exception {
+		Connection conn = (Connection) DriverManager.getConnection(
+				"jdbc:mysql://localhost:3306/test1", "root", "root");
+		PreparedStatement ps = (PreparedStatement) conn
+				.prepareStatement("select * from Customer");
+		ResultSet rs = ps.executeQuery();
+		System.out.println("Record Get List Search Method() ");
+
+		List list = new ArrayList();
+		while (rs.next()) {
+			CustomerModel customerModel = new CustomerModel();
+
+			customerModel.setId(rs.getInt(1));
+			customerModel.setName(rs.getString(2));
+			customerModel.setCity(rs.getString(3));
+
+			list.add(customerModel);
+
+			System.out.print(rs.getLong(1));
+			System.out.print("\t" + rs.getString(2));
+			System.out.print("\t" + rs.getString(3));
+			System.out.println();
+		}
+		return list;
 	}
 
-	public static List<CustomerModel> search(int pageNo, int pageSize) throws Exception {
+	public static List<CustomerModel> search(CustomerModel customerModel)
+			throws Exception {
+		Connection conn = (Connection) DriverManager.getConnection(
+				"jdbc:mysql://localhost:3306/test1", "root", "root");
+		StringBuffer sql = new StringBuffer("select * from Customer where true");
+
+		if (customerModel != null) {
+			if (customerModel.getName() != null
+					&& customerModel.getName().length() > 0) {
+				sql.append(" AND Name like '" + customerModel.getName() + "%'");
+			}
+		}
+		PreparedStatement ps = (PreparedStatement) conn.prepareStatement(sql
+				.toString());
+
+		ResultSet rs = ps.executeQuery();
+		System.out.println("Record Get List Search Method() Filter By Name ");
+
+		List list = new ArrayList();
+		while (rs.next()) {
+			customerModel = new CustomerModel();
+			customerModel.setId(rs.getInt(1));
+			customerModel.setName(rs.getString(2));
+			customerModel.setCity(rs.getString(3));
+			list.add(customerModel);
+			System.out.print(rs.getLong(1));
+			System.out.print("\t" + rs.getString(2));
+			System.out.print("\t" + rs.getString(3));
+			System.out.println();
+		}
+		return list;
+	}
+
+	public static List<CustomerModel> search(int pageNo, int pageSize)
+			throws Exception {
 		ArrayList list = new ArrayList();
-		StringBuffer sql = new StringBuffer("select * from ST_USER");
+		StringBuffer sql = new StringBuffer("select * from Customer where true");
 		if (pageSize > 0) {
 			// Calculate start record index
 			pageNo = (pageNo - 1) * pageSize;
@@ -166,26 +221,24 @@ public class CustomerModel {
 		Connection conn = (Connection) DriverManager.getConnection(
 				"jdbc:mysql://localhost:3306/test1", "root", "root");
 
-		PreparedStatement ps = (PreparedStatement) conn
-				.prepareStatement(sql.toString());
-		System.out.println("in List Service");
-		
+		PreparedStatement ps = (PreparedStatement) conn.prepareStatement(sql
+				.toString());
 
 		ResultSet rs = ps.executeQuery();
 
-		System.out.println("Record List");
-		System.out.println("ID\t" + "Name\t" + "City");
+		System.out.println("Record List Search(pageNo, PageSize) Methos");
+
 		while (rs.next()) {
-		CustomerModel customerModel = new CustomerModel();
+			CustomerModel customerModel = new CustomerModel();
 			customerModel.setId(rs.getLong(1));
 			customerModel.setName(rs.getString(2));
 			customerModel.setCity(rs.getString(3));
-			
 			list.add(customerModel);
-			
+
 			System.out.print(rs.getLong(1));
 			System.out.print("\t" + rs.getString(2));
 			System.out.print("\t" + rs.getString(3));
+			System.out.println();
 		}
 		rs.close();
 		return list;
@@ -194,38 +247,39 @@ public class CustomerModel {
 	public static void main(String[] args) throws Exception {
 		CustomerModel m = new CustomerModel();
 
-	/*	// Add Method
-		m.setId(2);
-		m.setName("Sunrays");
-		m.setCity("Technoogies");
-		add(m);
+		/*// Add Method
+		m.setId(10);
+		m.setName("Hemendra");
+		m.setCity("Bhopal");
+		add(m);*/
 
-		// Delete Method
+		/*// Delete Method
 		m.setId(2);
-		delete(m);
+		delete(m);*/
 
-		// Update Method
+		/*// Update Method
 		m.setId(1);
 		m.setName("SunRays");
 		m.setCity("Indore");
-		update(m);
+		update(m);*/
 
-		// findByPk() Method
+		/*// FindByPk() Method
 		m.setId(1);
-		findByPk(m);
-*/
-		// findByName() Method
-		//m.setName("SunRays");
-		//findByName(m);
-		
-		
-		
-		// Search
-		CustomerModel s = new CustomerModel(); s.setName("Sunil");
-		 List l = s.search();
-		 
+		findByPk(m);*/
+
+		/*// FindByName() Method
+		m.setName("SunRays");
+		findByName(m);*/
+
+		/*// Serach By List Method
+		search();*/
+
+		/*// Search List Method Filter By Name
+		m.setName("Hemendra");
+		search(m);*/
+
+		// Search PageNo pageSize
+		search(1, 3);
 
 	}
-
 }
-
