@@ -14,13 +14,14 @@ import com.mysql.jdbc.Statement;
 
 public class CustomerModel {
 
-	static {
-  	   Class.forName("com.mysql.jdbc.Driver");
-	}
-
 	private long id = 0;
 	private String name = null;
 	private String city = null;
+
+	public static Connection getConnection() throws Exception {
+		return (Connection) DriverManager.getConnection(
+				"jdbc:mysql://localhost:3306/test1", "root", "root");
+	}
 
 	public long getId() {
 		return id;
@@ -46,18 +47,11 @@ public class CustomerModel {
 		this.city = city;
 	}
 
-    public static Connection getConnection() throws Exception {
-        return (Connection) DriverManager.getConnection(
-				"jdbc:mysql://localhost:3306/test1", "root", "root");
-    }
- 
-
 	public long add() throws Exception {
-
 		Connection conn = getConnection();
 
 		PreparedStatement ps = (PreparedStatement) conn
-				.prepareStatement("INSERT INTO INTO ST_CUSTOMER VALUES(?,?,?)");
+				.prepareStatement("INSERT INTO ST_CUSTOMER VALUES(?,?,?)");
 		ps.setLong(1, id);
 		ps.setString(2, name);
 		ps.setString(3, city);
@@ -65,22 +59,21 @@ public class CustomerModel {
 		int i = ps.executeUpdate();
 
 		System.out.println("Customer Record Inserted # " + id);
-		
+
 		return i;
 	}
 
-	public static long delete(CustomerModel customerModel) throws Exception {
-		Class.forName("com.mysql.jdbc.Driver");
-		Connection conn = (Connection) DriverManager.getConnection(
-				"jdbc:mysql://localhost:3306/test1", "root", "root");
+	public long delete() throws Exception {
+		Connection conn = getConnection();
 
 		PreparedStatement ps = (PreparedStatement) conn
-				.prepareStatement("delete from Customer where id=?");
-		System.out.println("in Delete Service");
-		ps.setLong(1, customerModel.getId());
+				.prepareStatement("DELETE FROM ST_CUSTOMER WHERE ID=?");
+		ps.setLong(1, id);
 
 		int i = ps.executeUpdate();
-		System.out.println("Record Delete ");
+
+		System.out.println("Customer Record Deleted # " + id);
+
 		return i;
 	}
 
@@ -254,42 +247,4 @@ public class CustomerModel {
 		return list;
 	}
 
-	public static void main(String[] args) throws Exception {
-		CustomerModel m = new CustomerModel();
-
-		/*// Add Method
-		m.setId(10);
-		m.setName("Hemendra");
-		m.setCity("Bhopal");
-		add(m);*/
-
-		/*// Delete Method
-		m.setId(2);
-		delete(m);*/
-
-		/*// Update Method
-		m.setId(1);
-		m.setName("SunRays");
-		m.setCity("Indore");
-		update(m);*/
-
-		/*// FindByPk() Method
-		m.setId(1);
-		findByPk(m);*/
-
-		/*// FindByName() Method
-		m.setName("SunRays");
-		findByName(m);*/
-
-		/*// Serach By List Method
-		search();*/
-
-		/*// Search List Method Filter By Name
-		m.setName("Hemendra");
-		search(m);*/
-
-		// Search PageNo pageSize
-		search(1, 3);
-
-	}
 }
