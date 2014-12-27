@@ -18,11 +18,6 @@ public class CustomerModel {
 	private String name = null;
 	private String city = null;
 
-	public static Connection getConnection() throws Exception {
-		return (Connection) DriverManager.getConnection(
-				"jdbc:mysql://localhost:3306/test1", "root", "root");
-	}
-
 	public long getId() {
 		return id;
 	}
@@ -47,121 +42,150 @@ public class CustomerModel {
 		this.city = city;
 	}
 
+	public static Connection getConnection() throws Exception {
+		return (Connection) DriverManager.getConnection(
+				"jdbc:mysql://localhost:3306/test1", "root", "root");
+	}
+
 	public long add() throws Exception {
+
 		Connection conn = getConnection();
 
-		PreparedStatement ps = (PreparedStatement) conn
-				.prepareStatement("INSERT INTO ST_CUSTOMER VALUES(?,?,?)");
-		ps.setLong(1, id);
-		ps.setString(2, name);
-		ps.setString(3, city);
+		conn.setAutoCommit(false);
 
-		int i = ps.executeUpdate();
+		try {
+			PreparedStatement ps = (PreparedStatement) conn
+					.prepareStatement("INSERT INTO ST_CUSTOMER VALUES(?,?,?)");
+			ps.setLong(1, id);
+			ps.setString(2, name);
+			ps.setString(3, city);
 
-		System.out.println("Customer Record Inserted # " + id);
+			int i = ps.executeUpdate();
 
-		return i;
+			conn.commit();
+
+			System.out.println("Customer Record Inserted # " + id);
+
+		} catch (Exception e) {
+			conn.rollback();
+			e.printStackTrace();
+		}
+
+		return id;
 	}
 
 	public long delete() throws Exception {
+
+		Connection conn = getConnection();
+
+		conn.setAutoCommit(false);
+
+		try {
+			PreparedStatement ps = (PreparedStatement) conn
+					.prepareStatement("DELETE FROM ST_CUSTOMER WHERE ID=?");
+			ps.setLong(1, id);
+
+			int i = ps.executeUpdate();
+
+			conn.commit();
+
+			System.out.println("Customer Record Deleted # " + id);
+
+		} catch (Exception e) {
+			conn.rollback();
+			e.printStackTrace();
+		}
+
+		return id;
+	}
+
+	public long update() throws Exception {
+
+		Connection conn = getConnection();
+
+		conn.setAutoCommit(false);
+
+		try {
+			PreparedStatement ps = (PreparedStatement) conn
+					.prepareStatement("UPDATE ST_CUSTOMER SET NAME=?,CITY=? WHERE ID=?");
+
+			ps.setString(1, name);
+			ps.setString(2, city);
+			ps.setLong(3, id);
+
+			int i = ps.executeUpdate();
+
+			conn.commit();
+
+			System.out.println("Customer Record Update # " + id);
+		} catch (Exception e) {
+			conn.rollback();
+			e.printStackTrace();
+		}
+
+		return id;
+	}
+
+	public CustomerModel findByPk() throws Exception {
+
 		Connection conn = getConnection();
 
 		PreparedStatement ps = (PreparedStatement) conn
-				.prepareStatement("DELETE FROM ST_CUSTOMER WHERE ID=?");
+				.prepareStatement("SELECT NAME, CITY FROM ST_CUSTOMER WHERE ID=?");
+
 		ps.setLong(1, id);
 
-		int i = ps.executeUpdate();
+		ResultSet rs = ps.executeQuery();
 
-		System.out.println("Customer Record Deleted # " + id);
+		rs.next();
 
-		return i;
+		name = rs.getString(1);
+		city = rs.getString(2);
+
+		rs.close();
+
+		conn.commit();
+
+		System.out.println("Customer Record Get # " + id);
+
+		return this;
 	}
 
-	public static long update(CustomerModel customerModel) throws Exception {
-		Class.forName("com.mysql.jdbc.Driver");
-		Connection conn = (Connection) DriverManager.getConnection(
-				"jdbc:mysql://localhost:3306/test1", "root", "root");
+	public CustomerModel findByName() throws Exception {
+
+		Connection conn = getConnection();
 
 		PreparedStatement ps = (PreparedStatement) conn
-				.prepareStatement("update Customer set name=?,city=? where id=?");
-		System.out.println("in Upadte service");
-		ps.setString(1, customerModel.getName());
-		ps.setString(2, customerModel.getCity());
-		ps.setLong(3, customerModel.getId());
+				.prepareStatement("SELECT NAME, CITY FROM ST_CUSTOMER WHERE NAME=?");
 
-		int i = ps.executeUpdate();
-		System.out.println("Record Update ");
-		return i;
-	}
-
-	public static CustomerModel findByPk(CustomerModel customerModel)
-			throws Exception {
-		Class.forName("com.mysql.jdbc.Driver");
-		Connection conn = (Connection) DriverManager.getConnection(
-				"jdbc:mysql://localhost:3306/test1", "root", "root");
-
-		PreparedStatement ps = (PreparedStatement) conn
-				.prepareStatement("select * from Customer where id=?");
-		System.out.println("in findByPk Service");
-		ps.setLong(1, customerModel.getId());
+		ps.setString(1, name);
 
 		ResultSet rs = ps.executeQuery();
 
-		System.out.println("Record FindByPk");
-		System.out.println("ID\t" + "Name\t" + "City");
+		CustomerModel customerModel = new CustomerModel();
+
 		while (rs.next()) {
-			customerModel = new CustomerModel();
-			customerModel.setId(rs.getLong(1));
-			customerModel.setName(rs.getString(2));
-			customerModel.setCity(rs.getString(3));
 
-			System.out.print(+rs.getLong(1));
-			System.out.print("\t" + rs.getString(2));
-			System.out.print("\t" + rs.getString(3));
+			customerModel.setName(rs.getString(1));
+			customerModel.setCity(rs.getString(2));
 		}
-
 		rs.close();
+
+		System.out.println("Customer Record Get # " + customerModel.getName());
 		return customerModel;
 	}
 
-	public static CustomerModel findByName(CustomerModel customerModel)
-			throws Exception {
-		Class.forName("com.mysql.jdbc.Driver");
-		Connection conn = (Connection) DriverManager.getConnection(
-				"jdbc:mysql://localhost:3306/test1", "root", "root");
+	public List<CustomerModel> search() throws Exception {
+
+		Connection conn = getConnection();
 
 		PreparedStatement ps = (PreparedStatement) conn
-				.prepareStatement("select * from Customer where name=?");
-		System.out.println("in findByName Service");
-		ps.setString(1, customerModel.getName());
+				.prepareStatement("SELECT * FROM ST_CUSTOMER");
 
 		ResultSet rs = ps.executeQuery();
-
-		System.out.println("Record FindByName");
-		System.out.println("ID\t" + "Name\t" + "City");
-		while (rs.next()) {
-			customerModel = new CustomerModel();
-			customerModel.setId(rs.getLong(1));
-			customerModel.setName(rs.getString(2));
-			customerModel.setCity(rs.getString(3));
-
-			System.out.print(rs.getLong(1));
-			System.out.print("\t" + rs.getString(2));
-			System.out.print("\t" + rs.getString(3));
-		}
-		rs.close();
-		return customerModel;
-	}
-
-	public static List<CustomerModel> search() throws Exception {
-		Connection conn = (Connection) DriverManager.getConnection(
-				"jdbc:mysql://localhost:3306/test1", "root", "root");
-		PreparedStatement ps = (PreparedStatement) conn
-				.prepareStatement("select * from Customer");
-		ResultSet rs = ps.executeQuery();
-		System.out.println("Record Get List Search Method() ");
 
 		List list = new ArrayList();
+
 		while (rs.next()) {
 			CustomerModel customerModel = new CustomerModel();
 
@@ -170,20 +194,19 @@ public class CustomerModel {
 			customerModel.setCity(rs.getString(3));
 
 			list.add(customerModel);
-
-			System.out.print(rs.getLong(1));
-			System.out.print("\t" + rs.getString(2));
-			System.out.print("\t" + rs.getString(3));
-			System.out.println();
 		}
+		System.out.println("Customer Record List Search # ");
+
 		return list;
 	}
 
-	public static List<CustomerModel> search(CustomerModel customerModel)
+	public List<CustomerModel> search(CustomerModel customerModel)
 			throws Exception {
-		Connection conn = (Connection) DriverManager.getConnection(
-				"jdbc:mysql://localhost:3306/test1", "root", "root");
-		StringBuffer sql = new StringBuffer("select * from Customer where true");
+
+		Connection conn = getConnection();
+
+		StringBuffer sql = new StringBuffer(
+				"SELECT * FROM ST_CUSTOMER WHERE TRUE");
 
 		if (customerModel != null) {
 			if (customerModel.getName() != null
@@ -195,6 +218,7 @@ public class CustomerModel {
 				.toString());
 
 		ResultSet rs = ps.executeQuery();
+
 		System.out.println("Record Get List Search Method() Filter By Name ");
 
 		List list = new ArrayList();
@@ -203,26 +227,26 @@ public class CustomerModel {
 			customerModel.setId(rs.getInt(1));
 			customerModel.setName(rs.getString(2));
 			customerModel.setCity(rs.getString(3));
+
 			list.add(customerModel);
-			System.out.print(rs.getLong(1));
-			System.out.print("\t" + rs.getString(2));
-			System.out.print("\t" + rs.getString(3));
-			System.out.println();
+
 		}
 		return list;
 	}
 
-	public static List<CustomerModel> search(int pageNo, int pageSize)
+	public List<CustomerModel> search(int pageNo, int pageSize)
 			throws Exception {
+
+		Connection conn = getConnection();
+
 		ArrayList list = new ArrayList();
-		StringBuffer sql = new StringBuffer("select * from Customer where true");
+
+		StringBuffer sql = new StringBuffer(
+				"SELECT * FROM ST_CUSTOMER WHERE TRUE");
 		if (pageSize > 0) {
-			// Calculate start record index
 			pageNo = (pageNo - 1) * pageSize;
 			sql.append(" limit " + pageNo + "," + pageSize);
 		}
-		Connection conn = (Connection) DriverManager.getConnection(
-				"jdbc:mysql://localhost:3306/test1", "root", "root");
 
 		PreparedStatement ps = (PreparedStatement) conn.prepareStatement(sql
 				.toString());
@@ -236,12 +260,9 @@ public class CustomerModel {
 			customerModel.setId(rs.getLong(1));
 			customerModel.setName(rs.getString(2));
 			customerModel.setCity(rs.getString(3));
+
 			list.add(customerModel);
 
-			System.out.print(rs.getLong(1));
-			System.out.print("\t" + rs.getString(2));
-			System.out.print("\t" + rs.getString(3));
-			System.out.println();
 		}
 		rs.close();
 		return list;
