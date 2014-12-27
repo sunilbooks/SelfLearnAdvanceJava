@@ -14,6 +14,10 @@ import com.mysql.jdbc.Statement;
 
 public class CustomerModel {
 
+	static {
+  	   Class.forName("com.mysql.jdbc.Driver");
+	}
+
 	private long id = 0;
 	private String name = null;
 	private String city = null;
@@ -42,20 +46,26 @@ public class CustomerModel {
 		this.city = city;
 	}
 
-	public static long add(CustomerModel customerModel) throws Exception {
-		Class.forName("com.mysql.jdbc.Driver");
-		Connection conn = (Connection) DriverManager.getConnection(
+    public static Connection getConnection() throws Exception {
+        return (Connection) DriverManager.getConnection(
 				"jdbc:mysql://localhost:3306/test1", "root", "root");
+    }
+ 
+
+	public long add() throws Exception {
+
+		Connection conn = getConnection();
 
 		PreparedStatement ps = (PreparedStatement) conn
-				.prepareStatement("insert into Customer values(?,?,?)");
-		System.out.println("in Add service");
-		ps.setLong(1, customerModel.getId());
-		ps.setString(2, customerModel.getName());
-		ps.setString(3, customerModel.getCity());
+				.prepareStatement("INSERT INTO INTO ST_CUSTOMER VALUES(?,?,?)");
+		ps.setLong(1, id);
+		ps.setString(2, name);
+		ps.setString(3, city);
 
 		int i = ps.executeUpdate();
-		System.out.println("Record insert ");
+
+		System.out.println("Customer Record Inserted # " + id);
+		
 		return i;
 	}
 
