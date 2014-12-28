@@ -1,6 +1,8 @@
-package junit;
+package com.sunilbooks.selflearnjava.junit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
 import java.util.List;
@@ -12,7 +14,7 @@ import com.sunilbooks.selflearnjava.jdbc.CustomerModel;
 
 public class CustomerModelTestcase {
 
-	@Ignore
+	@Test
 	public void testAdd() throws Exception {
 
 		CustomerModel cm = new CustomerModel();
@@ -121,7 +123,7 @@ public class CustomerModelTestcase {
 		}
 	}
 
-	@Test
+	@Ignore
 	public void testListSearchByPageSize() throws Exception {
 		CustomerModel cm = new CustomerModel();
 

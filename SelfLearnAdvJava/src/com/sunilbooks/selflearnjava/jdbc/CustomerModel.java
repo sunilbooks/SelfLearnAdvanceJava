@@ -1,21 +1,48 @@
 package com.sunilbooks.selflearnjava.jdbc;
 
+import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.naming.directory.SearchControls;
-
-import com.mysql.jdbc.Connection;
-import com.mysql.jdbc.PreparedStatement;
-import com.mysql.jdbc.Statement;
-
+/**
+ * Encapsulates attributes and Create Read Update and Delete ( CRUD ) operations
+ * of Customer.
+ * 
+ * @version 1.0
+ * @since 01 Jan 2015
+ * @author Sunil Sahu
+ * @Copyright (c) Sunil Sahu
+ * @url www.sunilbooks.com
+ */
 public class CustomerModel {
 
+	/**
+	 * Load driver
+	 */
+	static {
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Primary Key Customer ID
+	 */
 	private long id = 0;
+
+	/**
+	 * Name of the Customer
+	 */
 	private String name = null;
+
+	/**
+	 * City of Customer
+	 */
 	private String city = null;
 
 	public long getId() {
@@ -42,15 +69,30 @@ public class CustomerModel {
 		this.city = city;
 	}
 
-	public static Connection getConnection() throws Exception {
+	/**
+	 * gets database connection
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public Connection getConnection() throws Exception {
 		return (Connection) DriverManager.getConnection(
-				"jdbc:mysql://localhost:3306/test1", "root", "root");
+				"jdbc:mysql://localhost:3306/ST_JAVA", "root", "");
 	}
+
+	/**
+	 * Adds customer
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 
 	public long add() throws Exception {
 
+		// Get connection
 		Connection conn = getConnection();
 
+		// Start transaction
 		conn.setAutoCommit(false);
 
 		try {
@@ -62,15 +104,13 @@ public class CustomerModel {
 
 			int i = ps.executeUpdate();
 
-			conn.commit();
+			conn.commit(); // Save changes
 
 			System.out.println("Customer Record Inserted # " + id);
 
 		} catch (Exception e) {
-			conn.rollback();
-			e.printStackTrace();
+			conn.rollback();// Revert changes
 		}
-
 		return id;
 	}
 
@@ -143,10 +183,6 @@ public class CustomerModel {
 		city = rs.getString(2);
 
 		rs.close();
-
-		conn.commit();
-
-		System.out.println("Customer Record Get # " + id);
 
 		return this;
 	}
