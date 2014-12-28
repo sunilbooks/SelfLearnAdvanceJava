@@ -2,32 +2,54 @@ package com.sunilbooks.selflearnjava.junit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
-import java.util.Iterator;
-import java.util.List;
-
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.List;
+
 import com.sunilbooks.selflearnjava.jdbc.CustomerModel;
 
+/**
+ * JUnit test case of CustomerModel class.
+ * 
+ * @version 1.0
+ * @since 01 Jan 2015
+ * @author Sunil Sahu
+ * @Copyright (c) Sunil Sahu
+ * @url www.sunilbooks.com
+ * 
+ */
 public class CustomerModelTestcase {
 
-	@Test
+	/**
+	 * tests Add method
+	 * 
+	 * @throws Exception
+	 */
+	@Ignore
 	public void testAdd() throws Exception {
 
-		CustomerModel cm = new CustomerModel();
-		cm.setId(13);
-		cm.setName("Ravi");
-		cm.setCity("Indore");
-		cm.add();
-		
-		CustomerModel newCm = cm.findByPk();
+		CustomerModel c = new CustomerModel();
+		c.setId(13);
+		c.setName("Ravi");
+		c.setCity("Indore");
+		c.add();
 
-		assertNotNull("Error : Customer Add Fail", cm);
+		// Find customer it
+		CustomerModel newC = new CustomerModel();
+		newC.setId(13);
+		newC = newC.findByPk();
+
+		assertNotNull("Error : Customer Add Fail", newC);
 	}
 
+	/**
+	 * tests Update method
+	 * 
+	 * @throws Exception
+	 */
 	@Ignore
 	public void testUpdate() throws Exception {
 
@@ -44,102 +66,75 @@ public class CustomerModelTestcase {
 		System.out.println("Success : Test Update Success");
 	}
 
+	/**
+	 * tests Delete method
+	 * 
+	 * @throws Exception
+	 */
 	@Ignore
 	public void testDelete() throws Exception {
 		CustomerModel cm = new CustomerModel();
 		cm.setId(8);
+		// Delete
 		cm.delete();
-
-		System.out.println("Suucess : Test Delete Success");
+		// Find it again
+		cm = cm.findByPk();
+		// Test fail if record is found
+		assertNull("Error : Find by PK ", cm);
 
 	}
 
-	@Ignore
+	@Test
 	public void testFindByPk() throws Exception {
 
 		CustomerModel cm = new CustomerModel();
-		cm.setId(9);
+		cm.setId(13);
 		cm = cm.findByPk();
 
-		assertNotNull("Error : Test Get Id Fail", cm);
+		assertNotNull("Error : Find by PK ", cm);
 
-		System.out.println(cm.getName());
-		System.out.println(cm.getCity());
-
-	}
-
-	@Ignore
-	public void testFindByName() throws Exception {
-
-		CustomerModel cm = new CustomerModel();
-		cm.setName("Pankaj");
-		cm = cm.findByName();
-
-		assertNotNull("Error : Test Get By Name Fail", cm);
-
-		System.out.println("Success : Test Get Success");
-
-		System.out.println(cm.getName());
-		System.out.println(cm.getCity());
+		System.out.println("Customer Info");
+		System.out.println("ID: " + cm.getId());
+		System.out.println("Name : " + cm.getName());
+		System.out.println("City : " + cm.getCity());
 
 	}
 
-	@Ignore
-	public void testListSearch() throws Exception {
+	@Test
+	public void testSearch() throws Exception {
+
 		CustomerModel cm = new CustomerModel();
+		cm.setCity("Indore");
 
-		List list = cm.search();
+		List<CustomerModel> list = cm.search();
 
-		assertTrue("Error : Test Search Fail", list.size() > 0);
+		assertTrue("Error : Empty list", list.size() > 0);
 
-		System.out.println("Suucess : Test List Search ");
-
-		Iterator it = list.iterator();
-		while (it.hasNext()) {
-			CustomerModel NewCm = (CustomerModel) it.next();
-			System.out.print(NewCm.getId());
-			System.out.print("\t" + NewCm.getName());
-			System.out.println("\t" + NewCm.getCity());
+		System.out.println("Customer List");
+		for (CustomerModel c : list) {
+			System.out.print(c.getId());
+			System.out.print("\t" + c.getName());
+			System.out.println("\t" + c.getCity());
 		}
 	}
 
-	@Ignore
-	public void testListSearchByName() throws Exception {
+	@Test
+	public void testSearchByPageSize() throws Exception {
+
 		CustomerModel cm = new CustomerModel();
+		cm.setCity("Indore");
 
-		cm.setName("Pankaj");
-		List list = cm.search(cm);
+		List<CustomerModel> list = cm.search(1, 10);
 
-		assertTrue("Error : Test Search Fail", list.size() > 0);
+		assertTrue("Error : Empty list", list.size() > 0);
 
-		System.out.println("Suucess : Test List Search By Name ");
-
-		Iterator it = list.iterator();
-		while (it.hasNext()) {
-			CustomerModel NewCm = (CustomerModel) it.next();
-			System.out.print(NewCm.getId());
-			System.out.print("\t" + NewCm.getName());
-			System.out.println("\t" + NewCm.getCity());
+		System.out.println("Customer List");
+		for (CustomerModel c : list) {
+			System.out.print(c.getId());
+			System.out.print("\t" + c.getName());
+			System.out.println("\t" + c.getCity());
 		}
-	}
 
-	@Ignore
-	public void testListSearchByPageSize() throws Exception {
-		CustomerModel cm = new CustomerModel();
-
-		List list = cm.search(1, 5);
-
-		assertTrue("Error : Test Search Fail", list.size() > 0);
-
-		System.out.println("Suucess : Test List Search By PageNo, PageSize ");
-
-		Iterator it = list.iterator();
-		while (it.hasNext()) {
-			CustomerModel NewCm = (CustomerModel) it.next();
-			System.out.print(NewCm.getId());
-			System.out.print("\t" + NewCm.getName());
-			System.out.println("\t" + NewCm.getCity());
-		}
 	}
 
 }

@@ -20,17 +20,6 @@ import java.util.List;
 public class CustomerModel {
 
 	/**
-	 * Load driver
-	 */
-	static {
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
 	 * Primary Key Customer ID
 	 */
 	private long id = 0;
@@ -70,6 +59,17 @@ public class CustomerModel {
 	}
 
 	/**
+	 * Load driver
+	 */
+	static {
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
 	 * gets database connection
 	 * 
 	 * @return
@@ -86,7 +86,6 @@ public class CustomerModel {
 	 * @return
 	 * @throws Exception
 	 */
-
 	public long add() throws Exception {
 
 		// Get connection
@@ -96,12 +95,17 @@ public class CustomerModel {
 		conn.setAutoCommit(false);
 
 		try {
+
+			// Create Statement
 			PreparedStatement ps = conn
 					.prepareStatement("INSERT INTO ST_CUSTOMER VALUES(?,?,?)");
+
+			// Set parameters
 			ps.setLong(1, id);
 			ps.setString(2, name);
 			ps.setString(3, city);
 
+			// Execute query
 			int i = ps.executeUpdate();
 
 			conn.commit(); // Save changes
@@ -114,53 +118,70 @@ public class CustomerModel {
 		return id;
 	}
 
-	public long delete() throws Exception {
-
-		Connection conn = getConnection();
-
-		conn.setAutoCommit(false);
-
-		try {
-			PreparedStatement ps = (PreparedStatement) conn
-					.prepareStatement("DELETE FROM ST_CUSTOMER WHERE ID=?");
-			ps.setLong(1, id);
-
-			int i = ps.executeUpdate();
-
-			conn.commit();
-
-			System.out.println("Customer Record Deleted # " + id);
-
-		} catch (Exception e) {
-			conn.rollback();
-			e.printStackTrace();
-		}
-
-		return id;
-	}
-
+	/**
+	 * Updates a customer record
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	public long update() throws Exception {
 
+		// Get connection
 		Connection conn = getConnection();
 
+		// Start Transaction
 		conn.setAutoCommit(false);
 
 		try {
+			// Create Statement
 			PreparedStatement ps = (PreparedStatement) conn
 					.prepareStatement("UPDATE ST_CUSTOMER SET NAME=?,CITY=? WHERE ID=?");
-
+			// Set parameters
 			ps.setString(1, name);
 			ps.setString(2, city);
 			ps.setLong(3, id);
 
+			// Execute query
 			int i = ps.executeUpdate();
 
-			conn.commit();
-
+			conn.commit();// Save changes
 			System.out.println("Customer Record Update # " + id);
+
 		} catch (Exception e) {
-			conn.rollback();
-			e.printStackTrace();
+			conn.rollback(); // revert changes
+		}
+		return id;
+	}
+
+	/**
+	 * Deletes Customer Record
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public long delete() throws Exception {
+
+		// Get Collection
+		Connection conn = getConnection();
+
+		// Start transaction
+		conn.setAutoCommit(false);
+
+		try {
+			// Create Statement
+			PreparedStatement ps = (PreparedStatement) conn
+					.prepareStatement("DELETE FROM ST_CUSTOMER WHERE ID=?");
+			ps.setLong(1, id);
+
+			// Execute query
+			int i = ps.executeUpdate();
+
+			conn.commit(); // Save changes
+
+			System.out.println("Customer Record Deleted # " + id);
+
+		} catch (Exception e) {
+			conn.rollback(); // Revert changes
 		}
 
 		return id;
@@ -174,14 +195,17 @@ public class CustomerModel {
 	 */
 	public CustomerModel findByPk() throws Exception {
 
+		// Get connection
 		Connection conn = getConnection();
-
+		// Create statement
 		PreparedStatement ps = conn
 				.prepareStatement("SELECT NAME, CITY FROM ST_CUSTOMER WHERE ID=?");
 		ps.setLong(1, id);
 
-		// Execute query and return RS
+		// Execute query
 		ResultSet rs = ps.executeQuery();
+
+		// move cursor to first row
 		rs.next();
 
 		// Get data
@@ -194,29 +218,103 @@ public class CustomerModel {
 		return this;
 	}
 
+	/**
+	 * Searches Customer by ID, Name, and City
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	public List<CustomerModel> search() throws Exception {
 
+		// Get connection
 		Connection conn = getConnection();
 
-		StringBuffer sb = new StringBuffer();
-		sb.append("SELECT * FROM ST_CUSTOMER WHERE 1=1 ");
+		// Create dynamic query
+		StringBuffer sql = new StringBuffer("select * from ST_CUSTOMER ");
+		// Add where class with a true condition
+		sql.append(" where true ");
+
+		// if id > 0 then add to query
 		if (id > 0) {
-			sb.append(" AND  ID = " + id);
+			sql.append(" and  ID = " + id);
 		}
-
+		// if name is not empty then add to query
 		if (name != null && name.trim().length() > 0) {
-			sb.append(" AND NAME LIKE  '" + name + "'");
+			sql.append(" and NAME like  '" + name + "'");
 		}
-
+		// if city is not empty then add to query
 		if (city != null && city.trim().length() > 0) {
-			sb.append(" AND CITY LIKE  '" + city + "'");
+			sql.append(" and  CITY like  '" + city + "'");
 		}
-		PreparedStatement ps = conn.prepareStatement(sb.toString());
 
+		// Create Statement
+		PreparedStatement ps = conn.prepareStatement(sql.toString());
+		// Execute query
 		ResultSet rs = ps.executeQuery();
 
-		List list = new ArrayList();
+		List<CustomerModel> list = new ArrayList<CustomerModel>();
 
+		// move cursor to next row
+		while (rs.next()) {
+			// Create model object
+			CustomerModel customerModel = new CustomerModel();
+			customerModel.setId(rs.getInt(1));
+			customerModel.setName(rs.getString(2));
+			customerModel.setCity(rs.getString(3));
+			// Add to list
+			list.add(customerModel);
+		}
+		return list;
+	}
+
+	/**
+	 * Search and return number of records as per page number and size. It is
+	 * used for pagination
+	 * 
+	 * @param pageNo
+	 * @param pageSize
+	 * @return
+	 * @throws Exception
+	 */
+	public List<CustomerModel> search(int pageNo, int pageSize)
+			throws Exception {
+
+		// get connection
+		Connection conn = getConnection();
+
+		// create dynamic query
+		StringBuffer sql = new StringBuffer("select * from ST_CUSTOMER ");
+		// add where class with a true condition
+		sql.append(" where true ");
+
+		// if id > 0 then add to query
+		if (id > 0) {
+			sql.append(" and  ID = " + id);
+		}
+		// if name is not empty then add to query
+		if (name != null && name.trim().length() > 0) {
+			sql.append(" and NAME like  '" + name + "'");
+		}
+		// if city is not empty then add to query
+		if (city != null && city.trim().length() > 0) {
+			sql.append(" and  CITY like  '" + city + "'");
+		}
+
+		// apply pagination
+		if (pageSize > 0) {
+			// calculate start record no
+			int recNo = (pageNo - 1) * pageSize;
+			sql.append(" limit " + recNo + "," + pageSize);
+		}
+
+		// Create Statement
+		PreparedStatement ps = conn.prepareStatement(sql.toString());
+		// Execute query
+		ResultSet rs = ps.executeQuery();
+
+		List<CustomerModel> list = new ArrayList<CustomerModel>();
+
+		// move cursor to next row
 		while (rs.next()) {
 			CustomerModel customerModel = new CustomerModel();
 			customerModel.setId(rs.getInt(1));
@@ -228,89 +326,14 @@ public class CustomerModel {
 	}
 
 	/**
-	 * Searches students by ID, Name and City
-	 * 
-	 * @param customerModel
-	 * @return
-	 * @throws Exception
+	 * Test Method
 	 */
-	public List<CustomerModel> search(CustomerModel customerModel)
-			throws Exception {
-
-		Connection conn = getConnection();
-
-		StringBuffer sql = new StringBuffer(
-				"SELECT * FROM ST_CUSTOMER WHERE TRUE");
-
-		if (customerModel != null) {
-			if (customerModel.getName() != null
-					&& customerModel.getName().length() > 0) {
-				sql.append(" AND Name like '" + customerModel.getName() + "%'");
-			}
-		}
-		PreparedStatement ps = (PreparedStatement) conn.prepareStatement(sql
-				.toString());
-
-		ResultSet rs = ps.executeQuery();
-
-		System.out.println("Record Get List Search Method() Filter By Name ");
-
-		List list = new ArrayList();
-		while (rs.next()) {
-			customerModel = new CustomerModel();
-			customerModel.setId(rs.getInt(1));
-			customerModel.setName(rs.getString(2));
-			customerModel.setCity(rs.getString(3));
-
-			list.add(customerModel);
-
-		}
-		return list;
-	}
-
-	public List<CustomerModel> search(int pageNo, int pageSize)
-			throws Exception {
-
-		Connection conn = getConnection();
-
-		ArrayList list = new ArrayList();
-
-		StringBuffer sql = new StringBuffer(
-				"SELECT * FROM ST_CUSTOMER WHERE TRUE");
-		if (pageSize > 0) {
-			pageNo = (pageNo - 1) * pageSize;
-			sql.append(" limit " + pageNo + "," + pageSize);
-		}
-
-		PreparedStatement ps = (PreparedStatement) conn.prepareStatement(sql
-				.toString());
-
-		ResultSet rs = ps.executeQuery();
-
-		System.out.println("Record List Search(pageNo, PageSize) Methos");
-
-		while (rs.next()) {
-			CustomerModel customerModel = new CustomerModel();
-			customerModel.setId(rs.getLong(1));
-			customerModel.setName(rs.getString(2));
-			customerModel.setCity(rs.getString(3));
-
-			list.add(customerModel);
-
-		}
-		rs.close();
-		return list;
-	}
-
 	public static void main(String[] args) throws Exception {
 		CustomerModel cm = new CustomerModel();
-		cm.setCity("Indore");
-		List<CustomerModel> l = cm.search();
-		System.out.println(l.size());
-		for (CustomerModel c : l) {
-			System.out.println(c.getName());
-		}
-
+		cm.setId(5);
+		cm.setName("Rajesh");
+		cm.setCity("Mumbai");
+		cm.add();
 	}
 
 }
