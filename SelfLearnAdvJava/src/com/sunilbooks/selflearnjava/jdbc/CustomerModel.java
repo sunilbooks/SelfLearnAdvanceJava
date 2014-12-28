@@ -76,7 +76,7 @@ public class CustomerModel {
 	 * @throws Exception
 	 */
 	public Connection getConnection() throws Exception {
-		return (Connection) DriverManager.getConnection(
+		return DriverManager.getConnection(
 				"jdbc:mysql://localhost:3306/ST_JAVA", "root", "");
 	}
 
@@ -96,7 +96,7 @@ public class CustomerModel {
 		conn.setAutoCommit(false);
 
 		try {
-			PreparedStatement ps = (PreparedStatement) conn
+			PreparedStatement ps = conn
 					.prepareStatement("INSERT INTO ST_CUSTOMER VALUES(?,?,?)");
 			ps.setLong(1, id);
 			ps.setString(2, name);
@@ -166,57 +166,52 @@ public class CustomerModel {
 		return id;
 	}
 
+	/**
+	 * Finds Customer by primary key Customer ID.
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	public CustomerModel findByPk() throws Exception {
 
 		Connection conn = getConnection();
 
-		PreparedStatement ps = (PreparedStatement) conn
+		PreparedStatement ps = conn
 				.prepareStatement("SELECT NAME, CITY FROM ST_CUSTOMER WHERE ID=?");
-
 		ps.setLong(1, id);
 
+		// Execute query and return RS
 		ResultSet rs = ps.executeQuery();
-
 		rs.next();
 
+		// Get data
 		name = rs.getString(1);
 		city = rs.getString(2);
 
+		// Close result set
 		rs.close();
 
 		return this;
-	}
-
-	public CustomerModel findByName() throws Exception {
-
-		Connection conn = getConnection();
-
-		PreparedStatement ps = (PreparedStatement) conn
-				.prepareStatement("SELECT NAME, CITY FROM ST_CUSTOMER WHERE NAME=?");
-
-		ps.setString(1, name);
-
-		ResultSet rs = ps.executeQuery();
-
-		CustomerModel customerModel = new CustomerModel();
-
-		while (rs.next()) {
-
-			customerModel.setName(rs.getString(1));
-			customerModel.setCity(rs.getString(2));
-		}
-		rs.close();
-
-		System.out.println("Customer Record Get # " + customerModel.getName());
-		return customerModel;
 	}
 
 	public List<CustomerModel> search() throws Exception {
 
 		Connection conn = getConnection();
 
-		PreparedStatement ps = (PreparedStatement) conn
-				.prepareStatement("SELECT * FROM ST_CUSTOMER");
+		StringBuffer sb = new StringBuffer();
+		sb.append("SELECT * FROM ST_CUSTOMER WHERE 1=1 ");
+		if (id > 0) {
+			sb.append(" AND  ID = " + id);
+		}
+
+		if (name != null && name.trim().length() > 0) {
+			sb.append(" AND NAME LIKE  '" + name + "'");
+		}
+
+		if (name != null && name.trim().length() > 0) {
+			sb.append(" AND CITY LIKE  '" + city + "'");
+		}
+		PreparedStatement ps = conn.prepareStatement(sb.toString());
 
 		ResultSet rs = ps.executeQuery();
 
@@ -224,18 +219,21 @@ public class CustomerModel {
 
 		while (rs.next()) {
 			CustomerModel customerModel = new CustomerModel();
-
 			customerModel.setId(rs.getInt(1));
 			customerModel.setName(rs.getString(2));
 			customerModel.setCity(rs.getString(3));
-
 			list.add(customerModel);
 		}
-		System.out.println("Customer Record List Search # ");
-
 		return list;
 	}
 
+	/**
+	 * Searches students by ID, Name and City
+	 * 
+	 * @param customerModel
+	 * @return
+	 * @throws Exception
+	 */
 	public List<CustomerModel> search(CustomerModel customerModel)
 			throws Exception {
 
@@ -302,6 +300,17 @@ public class CustomerModel {
 		}
 		rs.close();
 		return list;
+	}
+
+	public static void main(String[] args) throws Exception {
+		CustomerModel cm = new CustomerModel();
+		cm.setCity("Indore");
+		List<CustomerModel> l = cm.search();
+		System.out.println(l.size());
+		for (CustomerModel c : l) {
+			System.out.println(c.getName());
+		}
+
 	}
 
 }
