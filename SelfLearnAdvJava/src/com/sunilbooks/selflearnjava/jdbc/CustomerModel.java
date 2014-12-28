@@ -208,7 +208,7 @@ public class CustomerModel {
 			sb.append(" AND NAME LIKE  '" + name + "'");
 		}
 
-		if (name != null && name.trim().length() > 0) {
+		if (city != null && city.trim().length() > 0) {
 			sb.append(" AND CITY LIKE  '" + city + "'");
 		}
 		PreparedStatement ps = conn.prepareStatement(sb.toString());
