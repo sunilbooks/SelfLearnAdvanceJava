@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	id="WebApp_ID" version="3.0">
+
+	<display-name>SelfLearnAdvJavaWeb</display-name>
+
+	<context-param>
+		<param-name>adminEmail</param-name>
+		<param-value>admin@sunilbooks.com</param-value>
+	</context-param>
+	<context-param>
+		<param-name>pageSize</param-name>
+		<param-value>20</param-value>
+	</context-param>
+	<context-param>
+		<param-name>fileSize</param-name>
+		<param-value>5MB</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>url</param-name>
+		<param-value>com.mysql.jdbc.Driver</param-value>
+	</context-param>
+	<context-param>
+		<param-name>login</param-name>
+		<param-value>SunilOS</param-value>
+	</context-param>
+	<context-param>
+		<param-name>password</param-name>
+		<param-value>pass1234</param-value>
+	</context-param>
+
+	<servlet>
+		<servlet-name>HelloServlet</servlet-name>
+		<servlet-class>com.sunilbooks.servlet.HelloServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>HelloServlet</servlet-name>
+		<url-pattern>/Hello</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>HelloServlet</servlet-name>
+		<url-pattern>/Hi</url-pattern>
+	</servlet-mapping>
+
+	<!--Config DBPool Servlet and set database setting initialisation parameters -->
+	<servlet>
+		<servlet-name>DBPool</servlet-name>
+		<servlet-class>com.sunilbooks.servlet.DBConnectionPool</servlet-class>
+		<init-param>
+			<param-name>url</param-name>
+			<param-value>com.mysql.jdbc.Driver</param-value>
+		</init-param>
+		<init-param>
+			<param-name>login</param-name>
+			<param-value>SunilOS</param-value>
+		</init-param>
+		<init-param>
+			<param-name>password</param-name>
+			<param-value>pass1234</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>DBPool</servlet-name>
+		<url-pattern>/DBPool</url-pattern>
+	</servlet-mapping>
+
+
+	<!-- Maps 404 error code with ErrorHandler servlet -->
+
+	<error-page>
+		<error-code>404</error-code>
+		<location>/ErrorHandler</location>
+	</error-page>
+
+	<!-- Maps all uncaught Excetion and its child classes exceptions with ErrorHandler 
+		servlet -->
+	<error-page>
+		<exception-type>java.lang.Exception</exception-type>
+		<location>/ErrorHandler</location>
+	</error-page>
+
+	<session-config>
+		<!-- Session timeout defined in minutes -->
+		<session-timeout>20</session-timeout>
+	</session-config>
+
+	<filter>
+		<filter-name>testFilter</filter-name>
+		<filter-class>com.sunilbooks.filter.MyFilter</filter-class>
+		<init-param>
+			<param-name>login</param-name>
+			<param-value>sunilOS</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>testFilter</filter-name>
+		<url-pattern>/HelloFilter</url-pattern>
+	</filter-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+	
+	<!-- Security configuration -->
+	
+	<security-constraint>
+        <web-resource-collection>
+            <web-resource-name>
+               SunilBooksAuthentication
+            </web-resource-name>
+            <url-pattern>/secured/*</url-pattern>
+            <http-method>GET</http-method>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <description>
+               Only manager can access this url
+            </description>
+            <role-name>tomcat</role-name>
+        </auth-constraint>
+    </security-constraint>
+    
+    
+    <!--authentication methods can be BASIC or FORM  -->
+    <login-config>
+      <!-- <auth-method>BASIC</auth-method>  -->
+       
+            <auth-method>FORM</auth-method>
+      <form-login-config>
+        <form-login-page>/SecuredLogin.jsp</form-login-page>
+        <form-error-page>/SecuredError.jsp</form-error-page>
+      </form-login-config>      
+      
+    </login-config>
+	
+	
+	
+	
+
+</web-app>
