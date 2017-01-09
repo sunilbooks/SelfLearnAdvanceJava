@@ -132,8 +132,8 @@ public class SendMail {
 	 */
 	public static void sendAttachedFile() throws Exception {
 
-		String subject = "My first email from JavaMail API";
-		String msg = "<H1>Hi, this file has file attachements </H1>";
+		String subject = "My first email with file attachment";
+		String msg = "<H1>Hi, see the file attached </H1>";
 
 		// Initialize Session object
 		Session session = Session.getDefaultInstance(props);
